@@ -2,28 +2,25 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-"""Hacer una funcion para todos los formularios, por tema de ir debugeando y testeando la dejamos para lo ultimo"""
-# formularios = ['formulario_01.png', 'formulario_02.png','formulario_03.png','formulario_04.png','formulario_05.png', 'formulario_vacio.png']
-# for form in formularios
-
-form = 'formulario_01'
+form = 'formulario_1'
 img = cv2.imread(f"{form}.png",cv2.IMREAD_GRAYSCALE) 
 img.shape
-#Binarizamos la imagen con un Threshold de 128
+
+#Binarizamos la imagen con un Threshold de 128 <-- porque de 128 y no otro numero?
 th = 128
-img_th = img<th
+img_th = img<th # <-- porque menor a 128 y no mayor a 128?
 plt.imshow(img_th, cmap='gray'), plt.show()
 
-#Sumarizamos los pixeles que son 1 en el eje x para detectar las columnas
+#Sumamos todos los pixeles que son 1 en el eje X para detectar las columnas (axis=0)
 img_cols = np.sum(img_th,axis=0)
 print(img_cols)
 
-#Sumarizamos los pixeles que son 1 en el eje y para detectar las filas
+#Sumamos todos los pixeles que son 1 en el eje Y para detectar las filas (axis=1)
 img_rows = np.sum(img_th,axis=1)
 
-#Definimos un threshold del 80% para detectar filas y columnas
-th_rows = img_rows.max() * 0.8
-th_cols = img_cols.max() * 0.6
+#Definimos un threshold del 80% para detectar filas y columnas <-- porque del 80% y no otro porcentaje?
+th_rows = img_rows.max() * 0.8 # Si subis a 90% o bajas a 70% o 60% sigue funcionando
+th_cols = img_cols.max() * 0.6 # Esto es 60% no 80% porque?
 
 #Definimos nuestros arrays boolenos para detectar filas y columnas
 img_rows_th = img_rows>th_rows
@@ -38,7 +35,9 @@ cols_detected = np.where(img_cols > th_cols)[0]
 plt.imshow(img_th, cmap='gray')
 
 # Dibujar líneas horizontales en rojo para las filas
-for row in rows_detected:
+for row in rows_detected: # Si hacemos print(len(rows_detected)) no dice que tiene 12 pero cuando se muestra 
+                          # la imagen solo hay 11 linea rojas? Si hacemos print(rows_detected) nos devuelve 
+                          # [ 21  61 101 141 181 221 261 301 341 381 497 498], hay un espacio de mas entre el 21 y 61 eso podria ser el causante  
     plt.axhline(y=row, color='r', linestyle='-')
 
 # Dibujar líneas verticales en azul para las columnas
@@ -47,10 +46,13 @@ for col in cols_detected:
 plt.show()
 
 renglones = []
-for i in range(len(rows_detected) - 1):
-    start_row = rows_detected[i]
-    end_row = rows_detected[i + 1]
-
+for i in range(len(rows_detected) - 1): # Esta va de 0 a 11 en vez de 0 a 10 porque rows_detected tiene 12 elementos en vez de tener 11. 
+                                        # Deberiamos o poner - 2 o arrglar lo de rows_detected
+    start_row = rows_detected[i]        # Si el obejtivo es buscar un par de casillas para definir un inicio y un final y se quiere excluir 
+                                        # la ultima row_detected deveria ser:
+    end_row = rows_detected[i + 1]      #               - 1 para recorrer de 0 hasta la ultima para evitar un error de índice fuera de rango en la línea
+                                        #               - 2 para evitar llegar a la ultima 
+                                        
     for j in range(len(cols_detected) - 1):
         start_col = cols_detected[j]
         end_col = cols_detected[j + 1]
@@ -59,9 +61,7 @@ for i in range(len(rows_detected) - 1):
         casilla = img_th[start_row:end_row, start_col:end_col]
         renglones.append(casilla)
 
-len(renglones)
-
-#Me armo un diccionario con las "subimagenes", categorizandolas en "Encabezados", "Categoria", "respuesta de la categoria"
+# Me armo un diccionario con las "subimagenes", categorizandolas en "Encabezados", "Categoria", "respuesta de la categoria"
 diccionario_formulario = {}
 diccionario_formulario["Encabezado"] = renglones[1]
 diccionario_formulario["Encabezadoo"] = renglones[0]
@@ -102,34 +102,6 @@ for i, (key, casilla) in enumerate(diccionario_formulario.items()):
     plt.title(key)
 plt.tight_layout()
 plt.show()
-"""Esto es lo mismo que esta abajo pero es para visualizar las letras que va detectando. Recomiendo probarlo"""
-# letras = []
-# for ir, renglon in enumerate(renglones):
-#     # Aplicar umbralización en el renglón
-#     reng_uint8 = np.uint8(renglon)
-
-#     _, renglon_binary = cv2.threshold(reng_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-#     # Detección de componentes conectadas en el renglón binarizado
-#     num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(renglon_binary, 8, cv2.CV_32S)
-
-#     # Filtrar componentes conectadas por tamaño (ajusta th_area según tus necesidades)
-#     th_area = 50
-#     filtered_stats = stats[stats[:, -1] > th_area]
-
-#     # Mostrar componentes conectadas detectadas en el renglón
-#     for i, stat in enumerate(filtered_stats):
-        
-#         x, y, w, h, area = stat
-#         letra = renglon[y:y+h, x:x+w]  # Recorta la letra
-#         letras.append(letra)
-
-#     # Visualizar la letra individual (puedes ajustar el tamaño de la figura)
-#     plt.figure(figsize=(2, 2))
-#     plt.imshow(letra, cmap='gray')
-#             # Dibujar un rectángulo alrededor de la letra
-#     plt.title(f"Renglón {ir+1}, Letra {i+1}")
-#     plt.show()
 
 letras_por_renglon = {}  # Diccionario para almacenar la cantidad de letras por renglón
 letras = []
@@ -195,27 +167,7 @@ def devolucion(diccionario_respuestas):
     for key, value in informe.items():
         print(f"'{key}' : {value}")
 
-
-
 devolucion(diccionario_respuestas)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, colorbar=True, ticks=False):
     if new_fig:
@@ -231,19 +183,6 @@ def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, color
         plt.colorbar()
     if new_fig:        
         plt.show(block=blocking)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 connectivity = 8
 # Itera a través del diccionario y procesa las respuestas (elementos impares).
