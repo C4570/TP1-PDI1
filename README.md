@@ -8,7 +8,7 @@ git clone https://github.com/C4570/TP1-PDI1.git
 ```
 ##### 2) Abrir la terminal y acceder a la carpeta:
 ```bash
-cd ./tp-entorno
+cd ./TP1_PDI
 ```
 ##### 3) Acedemos al entorno virtual:
 ```bash
