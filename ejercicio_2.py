@@ -184,57 +184,6 @@ def main():
     for form in formularios:
         respuestas = deteccion(form)
         devolucion(respuestas, form)
-
+    input()
+    
 main()
-
-
-def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, colorbar=True, ticks=False):
-    if new_fig:
-        plt.figure()
-    if color_img:
-        plt.imshow(img)
-    else:
-        plt.imshow(img, cmap='gray')
-    plt.title(title)
-    if not ticks:
-        plt.xticks([]), plt.yticks([])
-    if colorbar:
-        plt.colorbar()
-    if new_fig:        
-        plt.show(block=blocking)
-
-connectivity = 8
-# Itera a través del diccionario y procesa las respuestas (elementos impares).
-for i, (key, casilla) in enumerate(diccionario_formulario.items()):
-    if i % 2 != 0:  # Verifica si el índice es impar (respuesta
-        casilla_uint8 = np.uint8(casilla)
-        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(casilla_uint8, connectivity, cv2.CV_32S)
-
-        # Filtra las estadísticas para eliminar componentes conectadas con áreas pequeñas
-        th_area = 10  # Ajusta este valor según tus necesidades
-        ix_area = stats[:, -1] > th_area
-        stats_filtradas = stats[ix_area, :]
-
-        # Verifica requisitos específicos (al menos 2 palabras y no más de 25 caracteres)
-        for stat in stats_filtradas:
-            left, top, width, height, area = stat  # Extraer información de la componente conectada
-            componente_conectada = casilla[top:top + height, left:left + width]
-
-            # Realiza el procesamiento y verificación de requisitos aquí
-            # Por ejemplo, contar palabras y verificar la longitud
-            print(componente_conectada)  # Reemplaza con tu lógica de procesamiento
-            imshow(img=labels)
-            break
-            # Verificar requisitos
-            palabras = texto.split()
-            if len(palabras) >= 2 and len(texto) <= 25:
-                print(f"Respuesta válida en {key}: {texto}")
-            else:
-                print(f"Respuesta no válida en {key}: {texto}")
-
-            # Puedes resaltar la región de texto válida en la imagen si lo deseas.
-            if len(palabras) >= 2 and len(texto) <= 25:
-                x, y, w, h = left, top, width, height
-                casilla = cv2.rectangle(casilla, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-        imshow(casilla, title=f'Respuesta: {key}')
