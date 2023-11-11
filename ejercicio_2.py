@@ -8,10 +8,10 @@ def deteccion(form):
     img = cv2.imread(f"{form}.png",cv2.IMREAD_GRAYSCALE) 
     img.shape
     #Binarizamos la imagen con un Threshold de 128 <-- porque de 128 y no otro numero?
-    th = 128
+    th = 128 # 128 esta por encima de los dos valores por eso detecta ambos y por consiguiente se crean la row 497 y 498
     img_th = img<th # Porque menor a 128 y no mayor a 128?
-    "Visualizamos el formulario Binarizado"
-    # plt.imshow(img_th, cmap='gray'), plt.show()
+    # "Visualizamos el formulario Binarizado"
+    #plt.imshow(img_th, cmap='gray'), plt.show()
 
     #Sumarizamos los pixeles que son 1 en el eje x para detectar las columnas
     img_cols = np.sum(img_th,axis=0)
@@ -37,7 +37,7 @@ def deteccion(form):
                               # la imagen solo hay 11 linea rojas? Si hacemos print(rows_detected) nos devuelve 
                               # [ 21  61 101 141 181 221 261 301 341 381 497 498], hay un espacio de mas entre el 21 y 61 eso podria ser el causante 
         plt.axhline(y=row, color='r', linestyle='-')
-
+        
     # Dibujar líneas verticales en azul para las columnas
     for col in cols_detected:
         plt.axvline(x=col, color='b', linestyle='-')
